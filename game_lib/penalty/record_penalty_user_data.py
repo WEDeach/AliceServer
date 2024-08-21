@@ -1,0 +1,9 @@
+from typing import Optional
+from dataclasses import dataclass, field
+from ..record_base import BaseRecord
+
+
+@dataclass
+class PenaltyUserDataRecord(BaseRecord):
+    isPenaltyTime: Optional[bool] = field(default=False)
+    endPenaltyTime: Optional[int] = field(default=None)

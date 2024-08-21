@@ -1,0 +1,341 @@
+import json
+import os
+from typing import Dict, List
+from flask import Blueprint, request
+
+
+from ....game_lib.req_container import ReqContainer
+from ....game_lib.res_container import ResContainer
+from ....game_lib.mst.record_mst_version_summary import MstVersionSummaryRecord
+from ....game_lib.mst.req_mst_version import MstVersionReq
+from ....game_lib.mst.res_mst_version import MstVersionRes
+
+
+bp_api_mst = Blueprint("Mst", __name__)
+
+MstTable = {
+    "item_mst": 1,
+    "job_mst": 4,
+    "art_mst": 5,
+    "medal_trade_group_mst": 6,
+    "medal_trade_series_mst": 7,
+    "medal_trade_mst": 8,
+    "card_mst": 9,
+    "costume_mst": 11,
+    "skill_mst": 14,
+    "help_mst": 15,
+    "login_bonus_mst": 16,
+    "login_bonus_reward_mst": 17,
+    "item_shop_mst": 18,
+    "item_shop_detail_mst": 19,
+    "gacha_mst": 20,
+    "gacha_pickup_mst": 21,
+    "gacha_series_mst": 22,
+    "character_mst": 27,
+    "mission_mst": 23,
+    "card_story_mst": 25,
+    "character_story_mst": 26,
+    "medal_trade_pickup_mst": 28,
+    "ultimate_art_method_mst": 29,
+    "set_effect_series_mst": 30,
+    "protector_skill_mst": 31,
+    "guild_role_mst": 32,
+    "resource_file_mst": 34,
+    "chat_stamp_mst": 35,
+    "user_levelup_mst": 36,
+    "mission_title_mst": 37,
+    "banner_mst": 38,
+    "alice_quest_scenario_mst": 39,
+    "alice_quest_story_mst": 40,
+    "quest_boss_story_mst": 41,
+    "character_ability_mst": 42,
+    "gacha_special_reward_mst": 43,
+    "character_level_up_exp_mst": 44,
+    "alice_quest_map_mst": 45,
+    "alice_quest_area_mst": 46,
+    "quest_stage_mst": 47,
+    "alice_quest_area_group_mst": 48,
+    "gacha_serif_mst": 49,
+    "quest_mission_mst": 50,
+    "quest_mission_reward_mst": 51,
+    "quest_stage_reward_mst": 54,
+    "set_effect_series_group_name_mst": 55,
+    "gvg_reward_mst": 56,
+    "effect_resource_name_mst": 57,
+    "gacha_bonus_mst": 58,
+    "cleaning_story_mst": 59,
+    "tips_mst": 60,
+    "card_evolution_mst": 61,
+    "quest_enemy_mst": 62,
+    "quest_schedule_mst": 63,
+    "quest_campaign_mst": 64,
+    "tutorial_story_mst": 65,
+    "battle_effect_mst": 66,
+    "navigator_talk_mst": 67,
+    "navigator_talk_story_mst": 68,
+    "movie_resource_mst": 69,
+    "user_title_mst": 70,
+    "guild_title_mst": 71,
+    "asset_bundle_replace_mst": 72,
+    "quest_area_character_mst": 73,
+    "reward_set_mst": 74,
+    "nightmare_search_mst": 75,
+    "nightmare_search_terms_mst": 76,
+    "nightmare_search_reward_pickup_mst": 77,
+    "gacha_step_up_bonus_mst": 78,
+    "gvg_bgm_mst": 79,
+    "extra_mission_mst": 82,
+    "asset_bundle_mst": 88,
+    "quest_card_bonus_reward_drop_rate_mst": 89,
+    "gvg_login_bonus_mst": 90,
+    "gvg_login_bonus_reward_mst": 91,
+    "character_ability_special_effect_mst": 92,
+    "limit_break_skill_mst": 93,
+    "character_board_mst": 95,
+    "character_board_tree_mst": 96,
+    "character_board_node_mst": 97,
+    "character_board_ability_mst": 98,
+    "alice_quest_story_effect_mst": 99,
+    "sugoroku_mst": 100,
+    "sugoroku_stage_mst": 101,
+    "sugoroku_cell_mst": 102,
+    "sugoroku_reward_mst": 103,
+    "sugoroku_cell_place_mst": 104,
+    "guild_mission_mst": 105,
+    "gacha_step_up_lap_bonus_mst": 106,
+    "gacha_step_up_lap_bonus_detail_mst": 107,
+    "character_weapon_another_motion_mst": 108,
+    "quest_area_character_unique_mst": 109,
+    "job_level_bonus_mst": 110,
+    "battle_character_multiple_mst": 111,
+    "guild_ship_parts_mst": 112,
+    "guild_ship_series_mst": 113,
+    "gacha_count_bonus_mst": 114,
+    "gacha_count_bonus_detail_mst": 115,
+    "talk_event_story_mst": 116,
+    "card_attribute_evolution_mst": 117,
+    "limit_break_nightmare_skill_mst": 118,
+    "limit_break_nightmare_effect_mst": 119,
+    "card_choice_mst": 120,
+    "solo_event_mst": 121,
+    "solo_event_difficulty_mst": 122,
+    "solo_event_branch_mst": 123,
+    "limit_break_skill_ability_mst": 124,
+    "item_card_limit_break_mst": 125,
+    "card_option_mst": 126,
+    "card_parameter_custom_ver2_mst": 127,
+    "card_skill_custom_ver2_mst": 128,
+    "quest_stage_status_limitation_mst": 129,
+    "quest_stage_job_limitation_mst": 130,
+    "job_awakening_ability_mst": 133,
+    "gvg_extra_effect_mst": 135,
+    "quest_presentation_cut_mst": 136,
+}
+MstTableVersions = [
+    {"mstTableId": 4, "version": 2},
+    {"mstTableId": 6, "version": 7},
+    {"mstTableId": 15, "version": 79},
+    {"mstTableId": 18, "version": 266},
+    {"mstTableId": 19, "version": 172},
+    {"mstTableId": 29, "version": 79},
+    {"mstTableId": 30, "version": 62},
+    {"mstTableId": 31, "version": 6},
+    {"mstTableId": 32, "version": 5},
+    {"mstTableId": 34, "version": 11111},
+    {"mstTableId": 35, "version": 158},
+    {"mstTableId": 36, "version": 34},
+    {"mstTableId": 39, "version": 314},
+    {"mstTableId": 41, "version": 302},
+    {"mstTableId": 43, "version": 370},
+    {"mstTableId": 44, "version": 3},
+    {"mstTableId": 45, "version": 375},
+    {"mstTableId": 48, "version": 291},
+    {"mstTableId": 49, "version": 3},
+    {"mstTableId": 50, "version": 441},
+    {"mstTableId": 51, "version": 402},
+    {"mstTableId": 54, "version": 362},
+    {"mstTableId": 55, "version": 4},
+    {"mstTableId": 56, "version": 185},
+    {"mstTableId": 57, "version": 2},
+    {"mstTableId": 59, "version": 63},
+    {"mstTableId": 60, "version": 16},
+    {"mstTableId": 62, "version": 330},
+    {"mstTableId": 64, "version": 128},
+    {"mstTableId": 65, "version": 55},
+    {"mstTableId": 66, "version": 80},
+    {"mstTableId": 67, "version": 253},
+    {"mstTableId": 68, "version": 262},
+    {"mstTableId": 69, "version": 349},
+    {"mstTableId": 70, "version": 168},
+    {"mstTableId": 71, "version": 111},
+    {"mstTableId": 72, "version": 50},
+    {"mstTableId": 73, "version": 236},
+    {"mstTableId": 74, "version": 177},
+    {"mstTableId": 75, "version": 20},
+    {"mstTableId": 76, "version": 6},
+    {"mstTableId": 77, "version": 9},
+    {"mstTableId": 79, "version": 14},
+    {"mstTableId": 82, "version": 5},
+    {"mstTableId": 78, "version": 236},
+    {"mstTableId": 89, "version": 104},
+    {"mstTableId": 90, "version": 68},
+    {"mstTableId": 91, "version": 67},
+    {"mstTableId": 92, "version": 77},
+    {"mstTableId": 93, "version": 6},
+    {"mstTableId": 95, "version": 31},
+    {"mstTableId": 96, "version": 27},
+    {"mstTableId": 97, "version": 52},
+    {"mstTableId": 98, "version": 35},
+    {"mstTableId": 99, "version": 11},
+    {"mstTableId": 102, "version": 15},
+    {"mstTableId": 100, "version": 13},
+    {"mstTableId": 101, "version": 7},
+    {"mstTableId": 104, "version": 2},
+    {"mstTableId": 105, "version": 7},
+    {"mstTableId": 106, "version": 186},
+    {"mstTableId": 107, "version": 174},
+    {"mstTableId": 109, "version": 153},
+    {"mstTableId": 108, "version": 35},
+    {"mstTableId": 110, "version": 2},
+    {"mstTableId": 111, "version": 46},
+    {"mstTableId": 112, "version": 51},
+    {"mstTableId": 113, "version": 29},
+    {"mstTableId": 114, "version": 226},
+    {"mstTableId": 115, "version": 225},
+    {"mstTableId": 116, "version": 3},
+    {"mstTableId": 123, "version": 3},
+    {"mstTableId": 122, "version": 4},
+    {"mstTableId": 121, "version": 2},
+    {"mstTableId": 117, "version": 180},
+    {"mstTableId": 119, "version": 1},
+    {"mstTableId": 118, "version": 47},
+    {"mstTableId": 120, "version": 30},
+    {"mstTableId": 124, "version": 2},
+    {"mstTableId": 63, "version": 1353},
+    {"mstTableId": 125, "version": 35},
+    {"mstTableId": 46, "version": 436},
+    {"mstTableId": 47, "version": 500},
+    {"mstTableId": 14, "version": 723},
+    {"mstTableId": 5, "version": 419},
+    {"mstTableId": 7, "version": 739},
+    {"mstTableId": 61, "version": 973},
+    {"mstTableId": 9, "version": 1271},
+    {"mstTableId": 25, "version": 755},
+    {"mstTableId": 42, "version": 622},
+    {"mstTableId": 27, "version": 678},
+    {"mstTableId": 26, "version": 510},
+    {"mstTableId": 28, "version": 595},
+    {"mstTableId": 58, "version": 705},
+    {"mstTableId": 20, "version": 1751},
+    {"mstTableId": 22, "version": 1229},
+    {"mstTableId": 38, "version": 4832},
+    {"mstTableId": 8, "version": 1707},
+    {"mstTableId": 21, "version": 1765},
+    {"mstTableId": 1, "version": 1791},
+    {"mstTableId": 16, "version": 716},
+    {"mstTableId": 17, "version": 540},
+    {"mstTableId": 23, "version": 1170},
+    {"mstTableId": 37, "version": 1001},
+    {"mstTableId": 126, "version": 2},
+    {"mstTableId": 127, "version": 18},
+    {"mstTableId": 128, "version": 11},
+    {"mstTableId": 130, "version": 6},
+    {"mstTableId": 129, "version": 4},
+    {"mstTableId": 133, "version": 26},
+    {"mstTableId": 136, "version": 5},
+    {"mstTableId": 135, "version": 1},
+    {"mstTableId": 83, "version": 7},
+    {"mstTableId": 40, "version": 321},
+]
+
+
+@bp_api_mst.route("/check_mst_version", methods=["POST", "GET"])
+def check_mst_version():
+    cl_msts: Dict[int, int] = {}
+    if request.method == "POST":
+        req = ReqContainer.unwrap(request.data, MstVersionReq)
+    
+        if req.payload:
+            for i in req.payload.mstVersionSummaryList:
+                cl_msts[i.mstTableId] = i.version
+
+    server_msts: List[MstVersionSummaryRecord] = []
+    for i in MstTableVersions:
+        if i["mstTableId"] in cl_msts:
+            if cl_msts[i["mstTableId"]] >= i["version"]:
+                continue
+        server_msts.append(MstVersionSummaryRecord(**i))
+
+    res = MstVersionRes(
+        lastMstVersionCreatedTime=1733088606,
+        lastCreatedTime="2024-06-30 13:00:00",
+        mstVersionSummaryList=server_msts,
+    )
+    rc = ResContainer.new(200, res)
+    return rc.dump_msgpack()
+
+
+@bp_api_mst.route("/get_<mst_table_name>_mst_list", methods=["POST", "GET"])
+def get_mst_list(mst_table_name: str):
+    if request.method == "POST":
+        req = ReqContainer.unwrap(request.data)
+
+    dummy_table_file_key = f"{mst_table_name}.json"
+    dummy_table_file_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "dummy_tables",
+        dummy_table_file_key,
+    )
+    table_key = mst_table_name + "_mst"
+    if table_key in MstTable:
+        mstTableId = MstTable[mst_table_name + "_mst"]
+        mstVersionSummary = None
+        for i in MstTableVersions:
+            if i["mstTableId"] == mstTableId:
+                mstVersionSummary = i
+        if mstVersionSummary is None:
+            raise ValueError(f"Mst Version not found: {mstTableId}")
+    else:
+        raise ValueError(f"Mst Table not found: {table_key}")
+    if os.path.exists(dummy_table_file_path):
+        with open(dummy_table_file_path, encoding="utf-8") as f:
+            d = json.loads(f.read())
+
+            float_patch_key = {
+                "movie_resource": ["vibStartTime"],
+                "navigator_talk": [
+                    "leftPositionX",
+                    "leftPositionY",
+                    "rightPositionX",
+                    "rightPositionY",
+                ],
+                "quest_card_bonus_reward_drop_rate": [
+                    "addRateWhenNoLimitBreak",
+                    "addRateWhenOneLimitBreak",
+                    "addRateWhenTwoLimitBreak",
+                    "addRateWhenThreeLimitBreak",
+                    "addRateWhenMaxLimitBreak",
+                ],
+                "quest_campaign": ["campaignValue"],
+            }
+            if mst_table_name in float_patch_key:
+                # patch float
+                for i in d:
+                    for pk in float_patch_key[mst_table_name]:
+                        if pk in i:
+                            i[pk] = float(i[pk])
+            if mst_table_name == "resource_file":
+                total_size = 0
+                for i in d:
+                    total_size += i["androidFileSize"]
+
+            rc = ResContainer.new(
+                200,
+                {
+                    "mstList": d,
+                    "mstVersionSummary": mstVersionSummary,
+                    "isForceUpdate": True,
+                },
+            )
+            return rc.dump_msgpack()
+    raise ValueError
