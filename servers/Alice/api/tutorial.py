@@ -1,31 +1,19 @@
 from typing import List
+
 from flask import Blueprint, request
 
-from ....game_lib.tutorial.req_set_character import SetCharacterReq
-
-from ....game_lib.tutorial.res_set_character import SetCharacterRes
-
 from ....game_lib.enums import TutorialMstId
-
-from ....game_lib.user.record_user_data import UserDataRecord
-
-from ....game_lib.tutorial.res_set_user_name import SetUserNameRes
-
-from ....game_lib.tutorial.req_set_user_name import SetUserNameReq
-
-from ....game_lib.gacha.record_multi_gacha_animation_param import (
-    MultiGachaAnimationParamRecord,
-)
-
-
-from ....game_lib.req_container import ReqContainer
-from ....game_lib.res_container import ResContainer
 from ....game_lib.gacha.record_gacha_data import GachaDataRecord
 from ....game_lib.gacha.record_gacha_detail_log import GachaDetailLogRecord
 from ....game_lib.gacha.record_gacha_pickup_data import GachaPickupDataRecord
 from ....game_lib.gacha.record_gacha_series_data import GachaSeriesDataRecord
+from ....game_lib.gacha.record_multi_gacha_animation_param import (
+    MultiGachaAnimationParamRecord,
+)
 from ....game_lib.gacha.res_gacha_exec import GachaExecRes
 from ....game_lib.gacha.res_get_tutorial_gacha_top import GetTutorialGachaTopRes
+from ....game_lib.req_container import ReqContainer
+from ....game_lib.res_container import ResContainer
 from ....game_lib.tutorial.record_user_mini_tutorial_data import (
     UserMiniTutorialDataRecord,
 )
@@ -33,13 +21,17 @@ from ....game_lib.tutorial.record_user_mini_tutorial_disable_message import (
     UserMiniTutorialDisableMessageRecord,
 )
 from ....game_lib.tutorial.req_get_next_tutorial_mst_id import GetNextTutorialMstIdReq
+from ....game_lib.tutorial.req_set_character import SetCharacterReq
+from ....game_lib.tutorial.req_set_user_name import SetUserNameReq
 from ....game_lib.tutorial.res_agree_legal_document import AgreeLegalDocumentRes
 from ....game_lib.tutorial.res_get_next_tutorial_mst_id import GetNextTutorialMstIdRes
 from ....game_lib.tutorial.res_get_user_mini_tutorial_data import (
     GetUserMiniTutorialDataRes,
 )
+from ....game_lib.tutorial.res_set_character import SetCharacterRes
+from ....game_lib.tutorial.res_set_user_name import SetUserNameRes
 from ....game_lib.tutorial.res_tutorial_gacha_exec import TutorialGachaExecRes
-
+from ....game_lib.user.record_user_data import UserDataRecord
 
 bp_api_tutorial = Blueprint("Tutorial", __name__)
 
@@ -49,7 +41,7 @@ def get_next_tutorial_mst_id():
     req = ReqContainer[GetNextTutorialMstIdReq].unwrap(
         request.data, GetNextTutorialMstIdReq
     )
-    res = GetNextTutorialMstIdRes(nextTutorialMstId=TutorialMstId.Quest)
+    res = GetNextTutorialMstIdRes(nextTutorialMstId=TutorialMstId.QuestResult)
     rc = ResContainer.new(200, res)
     return rc.dump_msgpack()
 
@@ -81,7 +73,7 @@ def get_user_mini_tutorial_data():
 def get_tutorial_gacha():
     req = ReqContainer.unwrap(request.data)
 
-    gachaSeriesList = GachaSeriesDataRecord.fetch_datas(2)
+    gachaSeriesList = GachaSeriesDataRecord.fetch(2)
     gachaList = GachaDataRecord.fetch_datas(gachaMstId=3)
     gachaPickupList = GachaPickupDataRecord.fetch_datas(gachaSeriesMstId=2)
     if gachaSeriesList:
