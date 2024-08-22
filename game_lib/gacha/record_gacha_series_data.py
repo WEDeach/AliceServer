@@ -22,7 +22,7 @@ class GachaSeriesDataRecord(BaseRecord):
     definitionText5: Optional[str] = field(default=None)
 
     @staticmethod
-    def fetch_datas(gachaSeriesMstId: int):
+    def fetch(gachaSeriesMstId: int):
         db = AliceShared.get_database()
         mst = db.get_mst_table("gacha_series")
         res: List[GachaSeriesDataRecord] = []

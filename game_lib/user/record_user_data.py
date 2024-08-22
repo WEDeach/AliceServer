@@ -1,5 +1,6 @@
-from typing import Optional
 from dataclasses import dataclass, field
+from typing import Optional
+
 from ..record_base import BaseRecord
 
 
@@ -80,7 +81,7 @@ class UserDataRecord(BaseRecord):
                 playerId=100117793,
                 comment="",
                 isGameMaster=1,
-                gameStatus=1,
+                gameStatus=10,
                 lastAccessTime=0,
                 currentCharacterMstId=1,
                 currentTotalPower=0,

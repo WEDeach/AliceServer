@@ -9,10 +9,13 @@ from ..res_base import BaseRes
 @dataclass
 class GetScenarioStoryMstRes(BaseRes):
     aliceQuestStoryMstList: List[AliceQuestStoryMstRecord] = field(default_factory=list)
-    mstVersionSummary: MstVersionSummaryRecord = field(init=False)
+    mstVersionSummary: Optional[MstVersionSummaryRecord] = field(default=None)
 
     @staticmethod
     def get(storyIndex: int, storyNo: int):
         r = GetScenarioStoryMstRes()
+
+        r.aliceQuestStoryMstList = AliceQuestStoryMstRecord.fetch(storyIndex, storyNo)
+        r.mstVersionSummary = MstVersionSummaryRecord.get(40)
 
         return r

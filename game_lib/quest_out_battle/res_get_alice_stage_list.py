@@ -33,6 +33,6 @@ class GetAliceStageListRes(BaseRes):
         )
 
         # TODO: fetch quest stage datas.
-        r.stageList = StageListRecord.fetch_datas(questAreaMstId)
+        r.stageList = StageListRecord.fetch(questAreaMstId)
 
         return r

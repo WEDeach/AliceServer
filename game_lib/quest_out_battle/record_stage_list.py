@@ -31,7 +31,7 @@ class StageListRecord(BaseRecord):
     maxEnableSkipCount: int = field(default=0)
 
     @staticmethod
-    def fetch_datas(questAreaMstId: int):
+    def fetch(questAreaMstId: int):
         db = AliceShared.get_database()
         ts = db.get_mst_table("quest_stage")
         res: List[StageListRecord] = []
@@ -41,7 +41,7 @@ class StageListRecord(BaseRecord):
                     StageListRecord(
                         questAreaMstId=t["questAreaMstId"],
                         questStageMstId=t["questStageMstId"],
-                        stageStatus=1 if t["level"] == 1 else 9,
+                        stageStatus=1,
                         stageBossEnemyId=203,
                         stageBossAssetBundleName="enemy/3",
                         stageBossAttribute=2,

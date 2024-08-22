@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
+from typing import List
 
 from ..record_base import BaseRecord
+from ...utils.shared import AliceShared
 
 
 @dataclass
@@ -25,3 +27,18 @@ class AliceQuestStoryMstRecord(BaseRecord):
     voiceQueueSheet: str = field(default="")
     voiceQueueName: str = field(default="")
     createdTime: int = field(default=0)
+    bgColor: int = field(default=0)
+
+    @staticmethod
+    def fetch(storyIndex: int, storyNo: int):
+        r: List[AliceQuestStoryMstRecord] = []
+
+        db = AliceShared.get_database()
+        mst = db.get_mst_table("alice_quest_story")
+        for i in mst:
+            if i["storyIndex"] == storyIndex:
+                if storyNo > 0:
+                    if i["storyNo"] != storyNo:
+                        continue
+                r.append(AliceQuestStoryMstRecord(**i))
+        return r
