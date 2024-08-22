@@ -6,7 +6,7 @@ from ..record_base import BaseRecord
 @dataclass
 class QuestResultDataRecord(BaseRecord):
     questStageMstId: int = field(default=0)
-    result: int = field(default=0)
+    result: int = field(default=1)
     rewardCountAfter: int = field(default=0)
     characterMstId: int = field(default=0)
     joinType: int = field(default=0)

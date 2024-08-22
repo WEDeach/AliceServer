@@ -51,3 +51,21 @@ class GetResultRes(BaseRes):
     skipValidTime: int = field(default=0)
     isRarisRentalPlayBattleeRaid: bool = field(default=False)
     enableWebView: bool = field(default=False)
+
+    @staticmethod
+    def get_by_tutorial(questStageMstId: int, characterMstId: int):
+        r = GetResultRes()
+
+        # TODO: fetch data for tutorial.
+        r.resultData.questStageMstId = questStageMstId
+        r.resultData.characterMstId = characterMstId
+        r.defaultReward.exp = 6
+        r.defaultReward.expBefore = 0
+        r.defaultReward.expAfter = 6
+        r.defaultReward.levelBefore = 1
+        r.defaultReward.levelAfter = 1
+        r.rankupResultData.beforeLevel = 1
+        r.rankupResultData.afterLevel = 1
+        r.userData = UserDataRecord.get(700001)
+
+        return r

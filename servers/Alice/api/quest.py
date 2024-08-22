@@ -4,9 +4,11 @@ from ....game_lib.quest_out_battle.req_get_alice_stage_list import GetAliceStage
 from ....game_lib.quest_out_battle.req_get_area_map_list import GetAreaMapListReq
 from ....game_lib.quest_out_battle.req_get_stage_data import GetStageDataReq
 from ....game_lib.quest_out_battle.req_get_stage_reward import GetStageRewardReq
+from ....game_lib.quest_out_battle.req_get_tutorial_result import GetTutorialResultReq
 from ....game_lib.quest_out_battle.res_get_alice_stage_list import GetAliceStageListRes
 from ....game_lib.quest_out_battle.res_get_area_map_list import GetAreaMapListRes
 from ....game_lib.quest_out_battle.res_get_attention import GetAttentionRes
+from ....game_lib.quest_out_battle.res_get_result import GetResultRes
 from ....game_lib.quest_out_battle.res_get_stage_data import GetStageDataRes
 from ....game_lib.quest_out_battle.res_get_stage_reward import GetStageRewardRes
 from ....game_lib.req_container import ReqContainer
@@ -75,10 +77,14 @@ def get_stage_reward():
 
 @bp_api_quest.route("/get_tutorial_result", methods=["POST"])
 def get_tutorial_result():
-    req = ReqContainer.unwrap(request.data, GetStageRewardReq)
+    req = ReqContainer.unwrap(request.data, GetTutorialResultReq)
 
+    print("get_tutorial_result:", req.payload)
     res = None
     if req.payload is not None:
-        res = GetTutorialResult.get(questStageMstId=req.payload.questStageMstId)
+        res = GetResultRes.get_by_tutorial(
+            questStageMstId=req.payload.questStageMstId,
+            characterMstId=req.payload.characterMstId,
+        )
     rc = ResContainer.new(200, res)
     return rc.dump_msgpack()
